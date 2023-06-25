@@ -1,4 +1,6 @@
 ﻿#pragma once
+#ifndef QCUSTOMMAINWINDOW_H
+#define QCUSTOMMAINWINDOW_H
 
 #include <QtWidgets/QWidget>
 #include "ui_qcustommainwindow.h"
@@ -79,3 +81,5 @@ private:
 	QTimer* timer = new QTimer(); //定时器
 	QVBoxLayout* layout = new QVBoxLayout(); //布局
 };
+
+#endif // QCUSTOMMAINWINDOW_H
