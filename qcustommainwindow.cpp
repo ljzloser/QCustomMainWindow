@@ -80,7 +80,7 @@ void QCustomMainWindow::setTitleBar(QWidget* titleBar)
 void QCustomMainWindow::setMenuBar(QWidget* menuBar)
 {
 	this->menuBar = menuBar;
-	this->menuBar->setFixedHeight(30);
+	this->menuBar->setFixedHeight(20);
 	this->loadLayout();
 }
 

@@ -1,7 +1,7 @@
 ﻿#include "qcustommainwindow.h"
 #include "qcustomtitlebar.h"
 #include <QtWidgets/QApplication>
-
+#include <qmainwindow.h>
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     QObject::connect(titleBar, &QCustomTitleBar::maxButtonClicked, &w, &QCustomMainWindow::showCustomNormal);
     QObject::connect(titleBar, &QCustomTitleBar::minButtonClicked, &w, &QCustomMainWindow::showMinimized);
     w.setTitleBar(titleBar);
-    w.setMainWidget(new QWidget());
+    w.setMainWidget(new QMainWindow());
     QMenuBar * menuBar = new QMenuBar();
     QMenu * fileMenu = menuBar->addMenu("文件");
     fileMenu->addAction("新建");
@@ -33,8 +33,6 @@ int main(int argc, char *argv[])
     QStatusBar * statusBar = new QStatusBar();
     statusBar->addWidget(new QLabel("状态栏"));
     w.setStatusBar(statusBar);
-
-
 
 
     w.show();
