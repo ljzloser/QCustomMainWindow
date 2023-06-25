@@ -24,17 +24,17 @@ public:
 	QCustomMainWindow(QWidget* parent = nullptr);
 	~QCustomMainWindow();
 	//加载布局
-	void loadLayout();
+	virtual void loadLayout();
 	//最大化及还原窗口
-	void showCustomNormal();
+	virtual void showCustomNormal();
 	//设置标题栏
-	void setTitleBar(QWidget* titleBar);
+	virtual void setTitleBar(QWidget* titleBar);
 	//设置菜单栏
-	void setMenuBar(QWidget* menuBar);
+	virtual void setMenuBar(QWidget* menuBar);
 	//设置主窗口
-	void setMainWidget(QWidget* mainWidget);
+	virtual void setMainWidget(QWidget* mainWidget);
 	//设置状态栏
-	void setStatusBar(QWidget* statusBar);
+	virtual void setStatusBar(QWidget* statusBar);
 	//获取标题栏
 	QWidget* getTitleBar() { return this->titleBar; }
 	//获取菜单栏
@@ -44,26 +44,34 @@ public:
 	//获取状态栏
 	QWidget* getStatusBar() { return this->statusBar; }
 	//设置边缘大小
-	void setEdgeSize(int edge_size);
+	virtual void setEdgeSize(int edge_size);
 	//设置圆角半径
-	void setRadius(int radius);
+	virtual void setRadius(int radius);
 	//设置边框颜色
-	void setBorderColor(QColor border_color, int border_size);
+	virtual void setBorderColor(QColor border_color, int border_size);
 	//设置背景颜色
-	void setBackgroundColor(QColor background_color);
+	virtual void setBackgroundColor(QColor background_color);
 	//绘图事件
 	void paintEvent(QPaintEvent* event);
 	//光标更新事件
-	void updateCursorShape();
+	virtual void updateCursorShape();
 	//鼠标移动事件
-	void mouseMoveEvent(QMouseEvent* event);
+	virtual void mouseMoveEvent(QMouseEvent* event);
 	//鼠标按下事件
-	void mousePressEvent(QMouseEvent* event);
+	virtual void mousePressEvent(QMouseEvent* event);
 	//鼠标释放事件
-	void mouseReleaseEvent(QMouseEvent* event);
-
+	virtual void mouseReleaseEvent(QMouseEvent* event);
+	//拦截事件
+	#if (QT_VERSION >= QT_VERSION_CHECK(6,0,0))
+		bool nativeEvent(const QByteArray& eventType, void* message, qintptr* result);
+	#else
+		bool nativeEvent(const QByteArray& eventType, void* message, long* result);
+	#endif
+	//设置分割线颜色
+	virtual void setSplitLineColor(QColor split_line_color);
 private:
 	Ui::QCustomMainWindowClass ui;
+protected:
 	QString dragging_edge = nullptr; //拖动的边缘
 	bool is_dragging = false; //是否正在拖动
 	int edge_size = 10; //边缘大小
@@ -80,6 +88,8 @@ private:
 	QRect* customNormal = nullptr; //自定义正常状态
 	QTimer* timer = new QTimer(); //定时器
 	QVBoxLayout* layout = new QVBoxLayout(); //布局
+	//分割线颜色
+	QColor split_line_color = Qt::GlobalColor::gray;
 };
 
 #endif // QCUSTOMMAINWINDOW_H

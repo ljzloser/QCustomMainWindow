@@ -35,6 +35,12 @@
     <ClCompile Include="qcustommainwindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <QtRcc Include="light\lightstyle.qrc">
+      <Filter>Resource Files</Filter>
+    </QtRcc>
+    <QtRcc Include="dark\darkstyle.qrc">
+      <Filter>Resource Files</Filter>
+    </QtRcc>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -43,9 +49,21 @@
     <ClCompile Include="qcustomtitlebar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MainWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="framelesswidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="qcustomtitlebar.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="MainWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="framelesswidget.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

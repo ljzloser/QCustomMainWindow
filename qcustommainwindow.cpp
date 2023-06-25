@@ -1,8 +1,8 @@
 ﻿#include "qcustommainwindow.h"
-int max(int a, int b)
-{
-	return a > b ? a : b;
-}
+#include "windows.h"
+#include "windowsx.h"
+#pragma comment (lib,"user32.lib")
+
 
 QCustomMainWindow::QCustomMainWindow(QWidget* parent)
 	: QWidget(parent)
@@ -18,6 +18,14 @@ QCustomMainWindow::QCustomMainWindow(QWidget* parent)
 	this->layout->setContentsMargins(this->edge_size, this->edge_size, this->edge_size, this->edge_size); //设置布局边距
 	this->layout->setSpacing(2); //设置布局间距
 	this->setLayout(this->layout); //设置布局
+	#ifdef Q_OS_WIN
+		HWND hwnd = (HWND)this->winId();
+		DWORD style = ::GetWindowLong(hwnd, GWL_STYLE);
+		::SetWindowLong(hwnd, GWL_STYLE, style | WS_MAXIMIZEBOX | WS_THICKFRAME | WS_CAPTION);
+	#endif
+	//安装事件过滤器识别拖动
+	this->installEventFilter(this);
+
 }
 
 QCustomMainWindow::~QCustomMainWindow()
@@ -74,6 +82,7 @@ void QCustomMainWindow::setTitleBar(QWidget* titleBar)
 	this->titleBar = titleBar;
 	this->titleBar->setMouseTracking(true); //设置鼠标跟踪
 	this->titleBar->setFixedHeight(30); //设置标题栏高度
+	this->titleBar->installEventFilter(this); //安装事件过滤器识别拖动
 	this->loadLayout();
 }
 
@@ -121,6 +130,7 @@ void QCustomMainWindow::setBackgroundColor(QColor background_color)
 
 void QCustomMainWindow::paintEvent(QPaintEvent* event)
 {
+	
 	QPainter* painter = new QPainter(this);
 	painter->setRenderHint(QPainter::Antialiasing); //反锯齿
 	painter->setPen(Qt::NoPen); //无边框
@@ -145,15 +155,17 @@ void QCustomMainWindow::paintEvent(QPaintEvent* event)
 		int w = this->layout->itemAt(i)->geometry().width();
 		int h = 1;
 		// 绘制分割线
-		painter->setPen(QPen(QColor(0, 0, 0, 50), 1));
+		painter->setPen(QPen(this->split_line_color, 1));
 		painter->drawLine(x, y, x + w, y + h);
 	}
 	painter->end();
 	delete painter;
+	
 }
 
 void QCustomMainWindow::updateCursorShape()
 {
+	/*
 	if (!this->isMaximized())
 	{
 		// 获取窗口的绝对位置
@@ -232,10 +244,12 @@ void QCustomMainWindow::updateCursorShape()
 			}
 		}
 	}
+	*/
 }
 
 void QCustomMainWindow::mouseMoveEvent(QMouseEvent* event)
 {
+	/*
 	if (!this->isMaximized())
 	{
 		// 获取窗口的绝对位置
@@ -432,11 +446,12 @@ void QCustomMainWindow::mouseMoveEvent(QMouseEvent* event)
 		}
 
 	}
+	*/
 }
 
 void QCustomMainWindow::mousePressEvent(QMouseEvent* event)
 {
-
+	/*
 	if (!this->isMaximized())
 	{
 		// 不是最大化状态
@@ -454,10 +469,12 @@ void QCustomMainWindow::mousePressEvent(QMouseEvent* event)
 			}
 		}
 	}
+	*/
 }
 
 void QCustomMainWindow::mouseReleaseEvent(QMouseEvent* event)
 {
+	/*
 	if (event->button() == Qt::LeftButton)
 	{
 		// 鼠标左键释放
@@ -466,4 +483,112 @@ void QCustomMainWindow::mouseReleaseEvent(QMouseEvent* event)
 		this->dragging_edge = "";
 		this->setCursor(Qt::ArrowCursor);
 	}
+	*/
+	
+}
+#if (QT_VERSION >= QT_VERSION_CHECK(6,0,0))//Qt6
+bool QCustomMainWindow::nativeEvent(const QByteArray& eventType, void* message, qintptr* result)
+#else
+bool QCustomMainWindow::nativeEvent(const QByteArray& eventType, void* message, long* result)
+#endif
+{
+	if (eventType == "windows_generic_MSG") {
+
+
+		MSG* msg = static_cast<MSG*>(message);//转换类型
+		//qDebug() << TIMEMS << "nativeEvent" << msg->wParam << msg->message;
+
+		//不同的消息类型和参数进行不同的处理
+		if (msg->message == WM_NCCALCSIZE) { //如果是计算窗口大小消息
+			*result = 0;
+			return true;
+		}
+		else if (msg->message == WM_SYSKEYDOWN) {//如果是alt键按下
+			//屏蔽alt键按下
+		}
+		else if (msg->message == WM_SYSKEYUP) {//如果是alt键松开
+			//屏蔽alt键松开
+		}
+		else if (msg->message == WM_NCHITTEST) {//如果是鼠标消息
+
+			//计算鼠标对应的屏幕坐标
+			//这里最开始用的 LOWORD HIWORD 在多屏幕的时候会有问题
+			//官方说明在这里 https://docs.microsoft.com/zh-cn/windows/win32/inputdev/wm-nchittest
+			long x = GET_X_LPARAM(msg->lParam);//获取鼠标x坐标
+			long y = GET_Y_LPARAM(msg->lParam);//获取鼠标y坐标
+			QPoint pos = mapFromGlobal(QPoint(x, y));
+			int padding = this->edge_size;//鼠标距离窗口边缘的距离
+			//判断当前鼠标位置在哪个区域
+			bool left = pos.x() < padding;
+			bool right = pos.x() > width() - padding;
+			bool top = pos.y() < padding;
+			bool bottom = pos.y() > height() - padding;
+			bool resizeEnable = true;//是否允许改变窗口大小
+			//鼠标移动到四个角,这个消息是当鼠标移动或者有鼠标键按下时候发出的
+			*result = 0;
+			if (resizeEnable) {
+				if (left && top) {
+					*result = HTTOPLEFT;//
+				}
+				else if (left && bottom) {
+					*result = HTBOTTOMLEFT;
+				}
+				else if (right && top) {
+					*result = HTTOPRIGHT;
+				}
+				else if (right && bottom) {
+					*result = HTBOTTOMRIGHT;
+				}
+				else if (left) {
+					*result = HTLEFT;
+				}
+				else if (right) {
+					*result = HTRIGHT;
+				}
+				else if (top) {
+					*result = HTTOP;
+				}
+				else if (bottom) {
+					*result = HTBOTTOM;
+				}
+			}
+
+			//先处理掉拉伸
+			if (0 != *result) {
+				return true;
+			}
+
+
+
+			//识别标题栏拖动产生半屏全屏效果
+			if (titleBar && titleBar->rect().contains(pos)) { //如果鼠标在标题栏上
+				QWidget* child = titleBar->childAt(pos); //获取标题栏上的控件
+				if (!child) { //如果标题栏上没有控件
+					*result = HTCAPTION; //设置为标题栏
+					return true;
+				}
+			}
+
+		}
+		else if (msg->wParam == PBT_APMSUSPEND && msg->message == WM_POWERBROADCAST) {
+			//系统休眠的时候自动最小化可以规避程序可能出现的问题
+			this->showMinimized();
+		}
+		else if (msg->wParam == PBT_APMRESUMEAUTOMATIC) {
+			//休眠唤醒后自动打开
+			this->showCustomNormal();
+		}
+		else if (msg->message == WM_NCRBUTTONUP)
+		{
+			return true;
+		}
+
+
+	}
+	return false;
+}
+
+void QCustomMainWindow::setSplitLineColor(QColor split_line_color)
+{
+	this->split_line_color = split_line_color;
 }
