@@ -34,6 +34,15 @@ int main(int argc, char *argv[])
     statusBar->addWidget(new QLabel("状态栏"));
     w.setStatusBar(statusBar);
 
+
+
+
+
+
+
+
+
+
     w.show();
     return a.exec();
 }
