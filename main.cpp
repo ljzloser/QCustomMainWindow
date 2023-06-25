@@ -35,6 +35,10 @@ int main(int argc, char *argv[])
     w.setStatusBar(statusBar);
 
 
+
+
+=========
+>>>>>>>>> Temporary merge branch 2
     w.show();
     return a.exec();
 }
