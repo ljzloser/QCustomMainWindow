@@ -9,7 +9,7 @@
 #include <QMenu>
 #include <QCursor>
 #include <QMouseEvent>
-
+#include <qpainter.h>
 
 class QCustomTitleBar : public QWidget
 {
@@ -51,6 +51,8 @@ public:
 	//设置关闭按钮图标
 	QIcon setCloseButtonIcon(const QIcon& icon);
 	QIcon setCloseButtonIcon(const QString& iconPath);
+	
+	void paintEvent(QPaintEvent* event) override;
 
 signals:
 	void minButtonClicked(); //最小化按钮点击信号
@@ -66,8 +68,8 @@ private slots:
 
 private:
 	QHBoxLayout* layout; //标题栏布局
-	QLabel* iconLabel; //标题栏图标
-	QLabel* titleLabel; //标题栏文本
+	QIcon icon; //标题栏图标
+	QString title; //标题栏文本
 	QPushButton* minButton; //最小化按钮
 	QPushButton* maxButton; //最大化按钮
 	QPushButton* closeButton; //关闭按钮

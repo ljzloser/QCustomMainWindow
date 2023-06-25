@@ -1,21 +1,30 @@
 ﻿#include "qcustomtitlebar.h"
+#include <QLineEdit>
+#include <qpainterpath.h>
 
 QCustomTitleBar::QCustomTitleBar(QWidget* parent) : QWidget(parent)
 {
 	this->layout = new QHBoxLayout(this);
 	this->layout->setContentsMargins(0, 0, 0, 0);
 
-	this->iconLabel = new QLabel(this);
-	this->iconLabel->setFixedSize(30, 30);
-	this->iconLabel->setScaledContents(true);//设置自动缩放
-	this->iconLabel->setMouseTracking(true);//设置鼠标跟踪
 
-	this->titleLabel = new QLabel(this);
-	this->titleLabel->setStyleSheet("font-size: 15px;");
-	this->titleLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);//设置文本对齐方式为左对齐且垂直居中
-	this->titleLabel->setContentsMargins(0, 0, 0, 0);
-	this->titleLabel->setFixedHeight(30);
-	this->titleLabel->setMouseTracking(true);//设置鼠标跟踪
+	/*自动缩放的占位符*/
+	QSpacerItem* spacerItem = new QSpacerItem(20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+	QLineEdit* lineEdit = new QLineEdit(this);
+	lineEdit->setPlaceholderText("搜索");
+	//添加一个action
+	QAction* action = new QAction("搜索", this);
+	//设置图标
+	// 获取系统回车键图标
+	QPixmap pixmap = style()->standardPixmap(QStyle::SP_DialogOkButton);
+	// 设置图标
+	action->setIcon(QIcon(pixmap));
+	//加入到lineEdit中
+	lineEdit->addAction(action, QLineEdit::TrailingPosition);
+	//再添加一个占位符，使得搜索框居中
+	QSpacerItem* spacerItem2 = new QSpacerItem(20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
 
 	//初始化按钮图标
 	this->standardIconMap.insert(ButtonIcon::MinButtonIcon, style()->standardIcon(QStyle::SP_TitleBarMinButton));
@@ -32,6 +41,7 @@ QCustomTitleBar::QCustomTitleBar(QWidget* parent) : QWidget(parent)
 	this->minButton->setIcon(this->standardIconMap.value(ButtonIcon::MinButtonIcon));
 	this->minButton->setCursor(Qt::PointingHandCursor);//设置鼠标为手型
 	connect(this->minButton, &QPushButton::clicked, this, &QCustomTitleBar::minButtonClicked);//最小化按钮信号
+	this->minButton->setToolTip("最小化");
 
 	this->maxButton = new QPushButton(this);
 	this->maxButton->setFixedSize(30, 30);
@@ -39,22 +49,27 @@ QCustomTitleBar::QCustomTitleBar(QWidget* parent) : QWidget(parent)
 	this->maxButton->setCursor(Qt::PointingHandCursor);
 	connect(this->maxButton, &QPushButton::clicked, this, &QCustomTitleBar::updateIcon); //最大化按钮信号,切换图标
 	connect(this->maxButton, &QPushButton::clicked, this, &QCustomTitleBar::maxButtonClicked);
+	//设置悬停提示
+	this->maxButton->setToolTip("最大化/还原");
 
 	this->closeButton = new QPushButton(this);
 	this->closeButton->setFixedSize(30, 30);
 	this->closeButton->setIcon(this->standardIconMap.value(ButtonIcon::CloseButtonIcon));
 	this->closeButton->setCursor(Qt::PointingHandCursor);
 	connect(this->closeButton, &QPushButton::clicked, this, &QCustomTitleBar::closeButtonClicked);
+	this->closeButton->setToolTip("关闭");
 
-	this->layout->addWidget(this->iconLabel);
-	this->layout->addWidget(this->titleLabel);
+
+	this->layout->addSpacerItem(spacerItem);
+	this->layout->addWidget(lineEdit);
+	this->layout->addSpacerItem(spacerItem2);
 	this->layout->addWidget(this->minButton);
 	this->layout->addWidget(this->maxButton);
 	this->layout->addWidget(this->closeButton);
 
 	this->setLayout(this->layout);
 	this->setTitleText("Title");
-	this->iconLabel->setPixmap(style()->standardIcon(QStyle::SP_TitleBarMenuButton).pixmap(30, 30));
+	this->icon = style()->standardIcon(QStyle::SP_TitleBarMenuButton);
 	this->flag = false;
 
 	QAction* minimizeAction = this->menu->addAction("最小化");
@@ -77,8 +92,7 @@ QCustomTitleBar::QCustomTitleBar(QWidget* parent) : QWidget(parent)
 QCustomTitleBar::~QCustomTitleBar()
 {
 	delete this->layout;
-	delete this->iconLabel;
-	delete this->titleLabel;
+
 	delete this->minButton;
 	delete this->maxButton;
 	delete this->closeButton;
@@ -87,17 +101,17 @@ QCustomTitleBar::~QCustomTitleBar()
 
 void QCustomTitleBar::setTitleIcon(const QIcon& icon)
 {
-	this->iconLabel->setPixmap(icon.pixmap(30, 30));
+	this->icon = icon;
 }
 
 void QCustomTitleBar::setTitleIcon(const QPixmap& pixmap)
 {
-	this->iconLabel->setPixmap(pixmap.scaled(30, 30, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+	this->icon = QIcon(pixmap);
 }
 
 void QCustomTitleBar::setTitleText(const QString& text)
 {
-	this->titleLabel->setText(text);
+	this->title = text;
 }
 
 void QCustomTitleBar::updateIcon()
@@ -240,7 +254,24 @@ QIcon QCustomTitleBar::setCloseButtonIcon(const QString& iconPath)
 	return this->setCloseButtonIcon(icon);
 }
 
+void QCustomTitleBar::paintEvent(QPaintEvent* event)
+{
+	QPainter painter(this);
+	//绘制icon,大小为30，30
+	painter.drawPixmap(0, 0, 30, 30, this->icon.pixmap(30, 30));
+	// 字体大小
+	QFont font;
+	font.setPointSize(12);
+	//微软雅黑
+	font.setFamily("Microsoft YaHei");
+	painter.setFont(font);
+	 
+	// 绘制标题
+	painter.drawText(40, 0, this->width() - 40, 30, Qt::AlignLeft | Qt::AlignVCenter, this->title);
+	painter.end();
+}
+
 void QCustomTitleBar::showMenu()
 {
-	this->menu->exec(QCursor::pos());
+	//this->menu->exec(QCursor::pos());
 }

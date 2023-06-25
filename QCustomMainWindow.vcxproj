@@ -83,7 +83,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="qcustomtitlebar.cpp" />
+    <QtRcc Include="dark\darkstyle.qrc" />
+    <QtRcc Include="light\lightstyle.qrc" />
     <QtRcc Include="qcustommainwindow.qrc" />
     <QtUic Include="qcustommainwindow.ui" />
     <QtMoc Include="qcustommainwindow.h" />
@@ -92,6 +95,9 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="qcustomtitlebar.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="MainWindow.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
