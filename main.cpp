@@ -40,8 +40,6 @@ int main(int argc, char *argv[])
     file.open(QFile::ReadOnly);
     QString styleSheet = QString::fromLatin1(file.readAll());
     a.setStyleSheet(styleSheet);
-
-
     w.show();
     w.resize(800, 600);
     return a.exec();
