@@ -69,6 +69,12 @@ public:
 	#endif
 	//设置分割线颜色
 	virtual void setSplitLineColor(QColor split_line_color);
+	//事件过滤器
+	virtual bool eventFilter(QObject* obj, QEvent* event);
+	// 窗口大小改变事件
+	virtual void resizeEvent(QResizeEvent* event);
+signals:
+	void windowStateChanged();
 private:
 	Ui::QCustomMainWindowClass ui;
 protected:

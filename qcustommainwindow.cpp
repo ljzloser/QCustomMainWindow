@@ -73,15 +73,17 @@ void QCustomMainWindow::showCustomNormal()
 	}
 	else
 	{
+		this->showNormal();
 		this->setGeometry(*this->customNormal); //还原
 	}
+	//emit this->windowStateChanged();
 }
 
 void QCustomMainWindow::setTitleBar(QWidget* titleBar)
 {
 	this->titleBar = titleBar;
 	this->titleBar->setMouseTracking(true); //设置鼠标跟踪
-	this->titleBar->setFixedHeight(30); //设置标题栏高度
+	this->titleBar->setFixedHeight(25); //设置标题栏高度
 	this->titleBar->installEventFilter(this); //安装事件过滤器识别拖动
 	this->loadLayout();
 }
@@ -96,6 +98,7 @@ void QCustomMainWindow::setMenuBar(QWidget* menuBar)
 void QCustomMainWindow::setMainWidget(QWidget* mainWidget)
 {
 	this->mainWidget = mainWidget;
+	this->mainWidget->installEventFilter(this);
 	this->loadLayout();
 }
 
@@ -496,7 +499,6 @@ bool QCustomMainWindow::nativeEvent(const QByteArray& eventType, void* message, 
 
 
 		MSG* msg = static_cast<MSG*>(message);//转换类型
-		//qDebug() << TIMEMS << "nativeEvent" << msg->wParam << msg->message;
 
 		//不同的消息类型和参数进行不同的处理
 		if (msg->message == WM_NCCALCSIZE) { //如果是计算窗口大小消息
@@ -511,9 +513,6 @@ bool QCustomMainWindow::nativeEvent(const QByteArray& eventType, void* message, 
 		}
 		else if (msg->message == WM_NCHITTEST) {//如果是鼠标消息
 
-			//计算鼠标对应的屏幕坐标
-			//这里最开始用的 LOWORD HIWORD 在多屏幕的时候会有问题
-			//官方说明在这里 https://docs.microsoft.com/zh-cn/windows/win32/inputdev/wm-nchittest
 			long x = GET_X_LPARAM(msg->lParam);//获取鼠标x坐标
 			long y = GET_Y_LPARAM(msg->lParam);//获取鼠标y坐标
 			QPoint pos = mapFromGlobal(QPoint(x, y));
@@ -555,6 +554,7 @@ bool QCustomMainWindow::nativeEvent(const QByteArray& eventType, void* message, 
 
 			//先处理掉拉伸
 			if (0 != *result) {
+				this->update();
 				return true;
 			}
 
@@ -591,4 +591,24 @@ bool QCustomMainWindow::nativeEvent(const QByteArray& eventType, void* message, 
 void QCustomMainWindow::setSplitLineColor(QColor split_line_color)
 {
 	this->split_line_color = split_line_color;
+}
+
+bool QCustomMainWindow::eventFilter(QObject* obj, QEvent* event)
+{
+	if (obj == this)
+	{
+
+		if (event->type() == QEvent::WindowStateChange)
+		{
+			emit windowStateChanged();
+		}
+
+		
+	}
+	return QWidget::eventFilter(obj, event);
+}
+
+void QCustomMainWindow::resizeEvent(QResizeEvent* event)
+{
+	this->update();
 }

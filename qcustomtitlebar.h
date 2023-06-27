@@ -62,7 +62,7 @@ signals:
 protected:
 	void mouseDoubleClickEvent(QMouseEvent* event) override;
 
-private slots:
+public slots:
 	void updateIcon(); //更新按钮图标
 	void showMenu(); //显示菜单
 

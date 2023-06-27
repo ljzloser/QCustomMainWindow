@@ -12,9 +12,9 @@ QCustomTitleBar::QCustomTitleBar(QWidget* parent) : QWidget(parent)
 	QSpacerItem* spacerItem = new QSpacerItem(20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
 	QLineEdit* lineEdit = new QLineEdit(this);
-	lineEdit->setPlaceholderText("搜索");
+	lineEdit->setPlaceholderText(QString::fromLocal8Bit("搜索"));
 	//添加一个action
-	QAction* action = new QAction("搜索", this);
+	QAction* action = new QAction(QString::fromLocal8Bit("搜索"), this);
 	//设置图标
 	// 获取系统回车键图标
 	QPixmap pixmap = style()->standardPixmap(QStyle::SP_DialogOkButton);
@@ -37,27 +37,27 @@ QCustomTitleBar::QCustomTitleBar(QWidget* parent) : QWidget(parent)
 	this->menu = new QMenu(this);
 
 	this->minButton = new QPushButton(this);
-	this->minButton->setFixedSize(30, 30);
+	this->minButton->setFixedSize(25, 25);
 	this->minButton->setIcon(this->standardIconMap.value(ButtonIcon::MinButtonIcon));
 	this->minButton->setCursor(Qt::PointingHandCursor);//设置鼠标为手型
 	connect(this->minButton, &QPushButton::clicked, this, &QCustomTitleBar::minButtonClicked);//最小化按钮信号
-	this->minButton->setToolTip("最小化");
+	this->minButton->setToolTip(QString::fromUtf8("最小化"));
 
 	this->maxButton = new QPushButton(this);
-	this->maxButton->setFixedSize(30, 30);
+	this->maxButton->setFixedSize(25, 25);
 	this->maxButton->setIcon(this->standardIconMap.value(ButtonIcon::MaxButtonIcon));
 	this->maxButton->setCursor(Qt::PointingHandCursor);
-	connect(this->maxButton, &QPushButton::clicked, this, &QCustomTitleBar::updateIcon); //最大化按钮信号,切换图标
+	//connect(this->maxButton, &QPushButton::clicked, this, &QCustomTitleBar::updateIcon); //最大化按钮信号,切换图标
 	connect(this->maxButton, &QPushButton::clicked, this, &QCustomTitleBar::maxButtonClicked);
 	//设置悬停提示
-	this->maxButton->setToolTip("最大化/还原");
+	this->maxButton->setToolTip(QString::fromLocal8Bit("最大化/还原"));
 
 	this->closeButton = new QPushButton(this);
-	this->closeButton->setFixedSize(30, 30);
+	this->closeButton->setFixedSize(25, 25);
 	this->closeButton->setIcon(this->standardIconMap.value(ButtonIcon::CloseButtonIcon));
 	this->closeButton->setCursor(Qt::PointingHandCursor);
 	connect(this->closeButton, &QPushButton::clicked, this, &QCustomTitleBar::closeButtonClicked);
-	this->closeButton->setToolTip("关闭");
+	this->closeButton->setToolTip(QString::fromLocal8Bit("关闭"));
 
 
 	this->layout->addSpacerItem(spacerItem);
@@ -80,7 +80,7 @@ QCustomTitleBar::QCustomTitleBar(QWidget* parent) : QWidget(parent)
 	QAction* maximizeAction = this->menu->addAction("最大化/还原");
 	maximizeAction->setObjectName("maximizeAction");
 	maximizeAction->setIcon(this->standardIconMap.value(ButtonIcon::MaxButtonIcon));
-	connect(maximizeAction, &QAction::triggered, this, &QCustomTitleBar::maxButtonClicked);
+	//connect(maximizeAction, &QAction::triggered, this, &QCustomTitleBar::maxButtonClicked);
 	connect(maximizeAction, &QAction::triggered, this, &QCustomTitleBar::updateIcon);
 
 	QAction* quitAction = this->menu->addAction("退出");
@@ -117,13 +117,16 @@ void QCustomTitleBar::setTitleText(const QString& text)
 void QCustomTitleBar::updateIcon()
 {
 	if (this->flag) {
+		
 		this->maxButton->setIcon(this->standardIconMap.value(ButtonIcon::MaxButtonIcon));
 		for (QAction* action : menu->actions()) {
 			if (action->objectName() == "maximizeAction") {
 				action->setIcon(this->standardIconMap.value(ButtonIcon::MaxButtonIcon));
-				break;
+				
+				continue;
 			}
 		}
+/*		QCustomTitleBar::maxButtonClicked()*/;
 		this->flag = false;
 	}
 	else {
@@ -131,11 +134,14 @@ void QCustomTitleBar::updateIcon()
 		for (QAction* action : menu->actions()) {
 			if (action->objectName() == "maximizeAction") {
 				action->setIcon(this->standardIconMap.value(ButtonIcon::RestoreButtonIcon));
-				break;
+				continue;
 			}
 		}
+		//还原按钮点击
+
 		this->flag = true;
 	}
+	update();
 }
 
 void QCustomTitleBar::mouseDoubleClickEvent(QMouseEvent* event)
@@ -258,7 +264,7 @@ void QCustomTitleBar::paintEvent(QPaintEvent* event)
 {
 	QPainter painter(this);
 	//绘制icon,大小为30，30
-	painter.drawPixmap(0, 0, 30, 30, this->icon.pixmap(30, 30));
+	painter.drawPixmap(0, 0, 25, 25, this->icon.pixmap(25, 25));
 	// 字体大小
 	QFont font;
 	font.setPointSize(12);
@@ -267,7 +273,7 @@ void QCustomTitleBar::paintEvent(QPaintEvent* event)
 	painter.setFont(font);
 	 
 	// 绘制标题
-	painter.drawText(40, 0, this->width() - 40, 30, Qt::AlignLeft | Qt::AlignVCenter, this->title);
+	painter.drawText(40, 0, this->width() - 40, 25, Qt::AlignLeft | Qt::AlignVCenter, this->title);
 	painter.end();
 }
 
