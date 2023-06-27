@@ -49,15 +49,9 @@
     <ClCompile Include="qcustomtitlebar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MainWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="qcustomtitlebar.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="MainWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
